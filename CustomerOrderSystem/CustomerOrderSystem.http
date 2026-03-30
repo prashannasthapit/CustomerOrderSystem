@@ -1,0 +1,47 @@
+@CustomerOrderSystem_HostAddress = http://localhost:5099
+
+### Customers
+GET {{CustomerOrderSystem_HostAddress}}/api/customers
+Accept: application/json
+
+###
+
+POST {{CustomerOrderSystem_HostAddress}}/api/customers
+Content-Type: application/json
+
+{
+  "name": "Alice Doe",
+  "email": "alice@example.com",
+  "phoneNumber": "+15550001"
+}
+
+### Orders
+GET {{CustomerOrderSystem_HostAddress}}/api/orders/customer/1
+Accept: application/json
+
+###
+
+POST {{CustomerOrderSystem_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "status": "Pending"
+}
+
+### OrderItems
+GET {{CustomerOrderSystem_HostAddress}}/api/orderitems/order/1
+Accept: application/json
+
+###
+
+POST {{CustomerOrderSystem_HostAddress}}/api/orderitems
+Content-Type: application/json
+
+{
+  "orderId": 1,
+  "productName": "Keyboard",
+  "quantity": 2,
+  "unitPrice": 49.99
+}
+
