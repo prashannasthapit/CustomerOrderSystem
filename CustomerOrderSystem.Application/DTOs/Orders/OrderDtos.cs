@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using CustomerOrderSystem.Models;
+using CustomerOrderSystem.Domain.Entities;
 
 namespace CustomerOrderSystem.DTOs.Orders;
 

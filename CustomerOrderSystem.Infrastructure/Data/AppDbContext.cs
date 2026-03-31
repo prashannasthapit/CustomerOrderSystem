@@ -1,4 +1,4 @@
-using CustomerOrderSystem.Models;
+using CustomerOrderSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CustomerOrderSystem.Data;

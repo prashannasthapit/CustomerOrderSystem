@@ -22,7 +22,7 @@ namespace CustomerOrderSystem.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("CustomerOrderSystem.Models.Customer", b =>
+            modelBuilder.Entity("CustomerOrderSystem.Domain.Entities.Customer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -55,7 +55,7 @@ namespace CustomerOrderSystem.Migrations
                     b.ToTable("Customers", (string)null);
                 });
 
-            modelBuilder.Entity("CustomerOrderSystem.Models.Order", b =>
+            modelBuilder.Entity("CustomerOrderSystem.Domain.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,7 +81,7 @@ namespace CustomerOrderSystem.Migrations
                     b.ToTable("Orders", (string)null);
                 });
 
-            modelBuilder.Entity("CustomerOrderSystem.Models.OrderItem", b =>
+            modelBuilder.Entity("CustomerOrderSystem.Domain.Entities.OrderItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -111,9 +111,9 @@ namespace CustomerOrderSystem.Migrations
                     b.ToTable("OrderItems", (string)null);
                 });
 
-            modelBuilder.Entity("CustomerOrderSystem.Models.Order", b =>
+            modelBuilder.Entity("CustomerOrderSystem.Domain.Entities.Order", b =>
                 {
-                    b.HasOne("CustomerOrderSystem.Models.Customer", "Customer")
+                    b.HasOne("CustomerOrderSystem.Domain.Entities.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -122,9 +122,9 @@ namespace CustomerOrderSystem.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("CustomerOrderSystem.Models.OrderItem", b =>
+            modelBuilder.Entity("CustomerOrderSystem.Domain.Entities.OrderItem", b =>
                 {
-                    b.HasOne("CustomerOrderSystem.Models.Order", "Order")
+                    b.HasOne("CustomerOrderSystem.Domain.Entities.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -133,12 +133,12 @@ namespace CustomerOrderSystem.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("CustomerOrderSystem.Models.Customer", b =>
+            modelBuilder.Entity("CustomerOrderSystem.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("CustomerOrderSystem.Models.Order", b =>
+            modelBuilder.Entity("CustomerOrderSystem.Domain.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
                 });

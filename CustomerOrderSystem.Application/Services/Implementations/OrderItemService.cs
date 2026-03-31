@@ -1,28 +1,27 @@
-using CustomerOrderSystem.Data;
 using CustomerOrderSystem.DTOs.OrderItems;
+using CustomerOrderSystem.Domain.Abstractions;
+using CustomerOrderSystem.Domain.Entities;
+using CustomerOrderSystem.Domain.Repositories;
 using CustomerOrderSystem.Exceptions;
-using CustomerOrderSystem.Models;
 using CustomerOrderSystem.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace CustomerOrderSystem.Services.Implementations;
 
-public class OrderItemService(AppDbContext dbContext) : IOrderItemService
+public class OrderItemService(
+    IOrderItemRepository orderItemRepository,
+    IOrderRepository orderRepository,
+    IUnitOfWork unitOfWork) : IOrderItemService
 {
     public async Task<IReadOnlyCollection<OrderItemResponseDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await dbContext.OrderItems
-            .AsNoTracking()
-            .OrderBy(i => i.Id)
+        return (await orderItemRepository.FindAllAsync())
             .Select(i => ToDto(i))
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 
     public async Task<OrderItemResponseDto> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var item = await dbContext.OrderItems
-            .AsNoTracking()
-            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+        var item = await orderItemRepository.GetByIdAsync(id, asNoTracking: true, cancellationToken);
 
         if (item is null)
         {
@@ -34,23 +33,20 @@ public class OrderItemService(AppDbContext dbContext) : IOrderItemService
 
     public async Task<IReadOnlyCollection<OrderItemResponseDto>> GetByOrderIdAsync(int orderId, CancellationToken cancellationToken = default)
     {
-        var orderExists = await dbContext.Orders.AnyAsync(o => o.Id == orderId, cancellationToken);
+        var orderExists = await orderRepository.ExistsByIdAsync(orderId, cancellationToken);
         if (!orderExists)
         {
             throw new NotFoundException($"Order with id '{orderId}' was not found.");
         }
 
-        return await dbContext.OrderItems
-            .AsNoTracking()
-            .Where(i => i.OrderId == orderId)
-            .OrderBy(i => i.Id)
+        return (await orderItemRepository.GetByOrderIdAsync(orderId, cancellationToken))
             .Select(i => ToDto(i))
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 
     public async Task<OrderItemResponseDto> CreateAsync(CreateOrderItemRequestDto request, CancellationToken cancellationToken = default)
     {
-        var orderExists = await dbContext.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken);
+        var orderExists = await orderRepository.ExistsByIdAsync(request.OrderId, cancellationToken);
         if (!orderExists)
         {
             throw new NotFoundException($"Order with id '{request.OrderId}' was not found.");
@@ -64,15 +60,17 @@ public class OrderItemService(AppDbContext dbContext) : IOrderItemService
             UnitPrice = request.UnitPrice
         };
 
-        dbContext.OrderItems.Add(item);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+        orderItemRepository.Create(item);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return ToDto(item);
     }
 
     public async Task UpdateAsync(int id, UpdateOrderItemRequestDto request, CancellationToken cancellationToken = default)
     {
-        var item = await dbContext.OrderItems.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+        var item = await orderItemRepository.GetByIdAsync(id, asNoTracking: false, cancellationToken);
         if (item is null)
         {
             throw new NotFoundException($"Order item with id '{id}' was not found.");
@@ -93,19 +91,23 @@ public class OrderItemService(AppDbContext dbContext) : IOrderItemService
             item.UnitPrice = request.UnitPrice.Value;
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
-        var item = await dbContext.OrderItems.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+        var item = await orderItemRepository.GetByIdAsync(id, asNoTracking: false, cancellationToken);
         if (item is null)
         {
             throw new NotFoundException($"Order item with id '{id}' was not found.");
         }
 
-        dbContext.OrderItems.Remove(item);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+        orderItemRepository.Delete(item);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     private static OrderItemResponseDto ToDto(OrderItem item)

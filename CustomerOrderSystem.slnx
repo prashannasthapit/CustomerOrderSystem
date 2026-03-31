@@ -1,3 +1,6 @@
 <Solution>
+  <Project Path="CustomerOrderSystem.Domain/CustomerOrderSystem.Domain.csproj" />
+  <Project Path="CustomerOrderSystem.Application/CustomerOrderSystem.Application.csproj" />
+  <Project Path="CustomerOrderSystem.Infrastructure/CustomerOrderSystem.Infrastructure.csproj" />
   <Project Path="CustomerOrderSystem/CustomerOrderSystem.csproj" />
 </Solution>

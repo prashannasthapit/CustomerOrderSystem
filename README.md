@@ -8,13 +8,10 @@ ASP.NET Core Web API for managing Customers, Orders, and Order Items with EF Cor
 - PostgreSQL
 
 ## Project Structure
-- `CustomerOrderSystem/Models` - Domain entities
-- `CustomerOrderSystem/DTOs` - Request/response contracts
-- `CustomerOrderSystem/Data` - `AppDbContext` + Fluent API configuration
-- `CustomerOrderSystem/Services` - Business logic layer
-- `CustomerOrderSystem/Controllers` - REST endpoints
-- `CustomerOrderSystem/Middleware` - Global exception handling
-- `CustomerOrderSystem/Migrations` - EF Core migrations
+- `CustomerOrderSystem/` - API (Presentation): controllers, middleware, Program, Swagger
+- `CustomerOrderSystem.Domain/` - Domain entities and repository/UoW contracts
+- `CustomerOrderSystem.Application/` - DTOs, service interfaces/implementations, business exceptions
+- `CustomerOrderSystem.Infrastructure/` - EF Core `AppDbContext`, migrations, repository implementations, transaction/UoW, DI registration
 
 ## Prerequisites
 - .NET SDK 10+
@@ -31,17 +28,15 @@ Default development connection string:
 
 ## Run
 ```bash
-cd CustomerOrderSystem
-dotnet build
-dotnet ef database update
-dotnet run --urls http://localhost:5099
+dotnet build CustomerOrderSystem.slnx
+dotnet ef database update --project CustomerOrderSystem.Infrastructure --startup-project CustomerOrderSystem
+dotnet run --project CustomerOrderSystem --urls http://localhost:5099
 ```
 
 ## Migration Commands
 ```bash
-cd CustomerOrderSystem
-dotnet ef migrations add InitialCreate --output-dir Migrations
-dotnet ef database update
+dotnet ef migrations add InitialCreate --project CustomerOrderSystem.Infrastructure --startup-project CustomerOrderSystem --output-dir Migrations
+dotnet ef database update --project CustomerOrderSystem.Infrastructure --startup-project CustomerOrderSystem
 ```
 
 ## API Endpoints
@@ -72,6 +67,8 @@ dotnet ef database update
 - Referential integrity is enforced with foreign keys.
 - Customer deletion is blocked when orders exist.
 - Order deletion is blocked when order items exist.
+- Repositories use a shared generic `RepositoryBase<T>` for common CRUD/query operations.
+- Writes are transaction-safe via Unit of Work and explicit EF Core transactions.
 - Input validation uses DataAnnotations.
 - API uses consistent JSON error responses via middleware.
 
