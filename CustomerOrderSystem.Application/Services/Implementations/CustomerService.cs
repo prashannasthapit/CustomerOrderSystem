@@ -104,7 +104,7 @@ public class CustomerService(ICustomerRepository customerRepository, IUnitOfWork
         }
 
         await using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
-        customerRepository.Delete(customer);
+        // customerRepository.Delete(customer);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
     }

@@ -1,8 +1,10 @@
 using CustomerOrderSystem.Data;
 using CustomerOrderSystem.Domain.Abstractions;
+using CustomerOrderSystem.Domain.Entities;
 using CustomerOrderSystem.Domain.Repositories;
 using CustomerOrderSystem.Infrastructure.Persistence;
 using CustomerOrderSystem.Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,11 +17,20 @@ public static class DependencyInjection
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        
+        // services.AddDbContext<IdentityAppDbContext>(options =>
+        //     options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
-        services.AddScoped<ICustomerRepository, CustomerRepository>();
-        services.AddScoped<IOrderRepository, OrderRepository>();
-        services.AddScoped<IOrderItemRepository, OrderItemRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services
+            .AddIdentity<User, IdentityRole<int>>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+        
+        services
+            .AddScoped<ICustomerRepository, CustomerRepository>()
+            .AddScoped<IOrderRepository, OrderRepository>()
+            .AddScoped<IOrderItemRepository, OrderItemRepository>()
+            .AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

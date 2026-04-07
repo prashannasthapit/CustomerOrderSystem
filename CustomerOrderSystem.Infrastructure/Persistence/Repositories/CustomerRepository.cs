@@ -26,21 +26,21 @@ public class CustomerRepository(AppDbContext dbContext) : RepositoryBase<Custome
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<Customer?> GetByIdWithOrdersAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByIdWithOrdersAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await Context.Customers
+        return await Context.Users
             .Include(c => c.Orders)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public Task<bool> ExistsByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return Context.Customers.AnyAsync(c => c.Id == id, cancellationToken);
+        return Context.Users.AnyAsync(c => c.Id == id, cancellationToken);
     }
 
     public Task<bool> ExistsByEmailAsync(string email, int? excludingId = null, CancellationToken cancellationToken = default)
     {
-        return Context.Customers.AnyAsync(
+        return Context.Users.AnyAsync(
             c => c.Email == email && (!excludingId.HasValue || c.Id != excludingId.Value),
             cancellationToken);
     }
